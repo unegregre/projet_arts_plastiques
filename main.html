@@ -21,7 +21,7 @@
 		<script type="module">
             import * as THREE from 'https://threejsfundamentals.org/threejs/resources/threejs/r119/build/three.module.js';
             import {OrbitControls} from 'https://threejsfundamentals.org/threejs/resources/threejs/r119/examples/jsm/controls/OrbitControls.js';
-            import {OBJLoader2} from 'https://threejsfundamentals.org/threejs/resources/threejs/r119/examples/jsm/loaders/OBJLoader2.js';
+            import {OBJLoader} from 'https://threejsfundamentals.org/threejs/resources/threejs/r119/examples/jsm/loaders/OBJLoader.js';
             
             var canvas;
             var renderer;
@@ -96,8 +96,19 @@
                 controls.update();
 
 
-                scene = new THREE.Scene();
-                scene.background = new THREE.Color('black');
+                // var path = "./texture/";
+				// var format = '.jpg';
+				// var urls = [
+				// 	path + 'wall' + format, path + 'wall' + format,
+                //     path + 'wall' + format, path + 'wall' + format,
+                //     path + 'wall' + format, path + 'wall' + format
+				// ];
+
+				// var textureCube = new THREE.CubeTextureLoader().load( urls );
+
+				scene = new THREE.Scene();
+				scene.background = new THREE.Color('black');
+                
 
                 scene.add(new THREE.AxisHelper(10));
 
@@ -119,7 +130,7 @@
                     side: THREE.DoubleSide,
                     });
                     const mesh = new THREE.Mesh(boxGeo, boxMat);
-                    mesh.scale.set(12,12,8);
+                    mesh.scale.set(8,8,8);
                     mesh.position.set(0,-4,0);
                     mesh.rotation.x = Math.PI * -.5;
                     scene.add(mesh);
@@ -127,23 +138,38 @@
 
                 // Room/skybox
                 {
-                    const roomSize = 20;
-
-                    const loader = new THREE.TextureLoader();
-                    const textureRoom = loader.load('https://threejsfundamentals.org/threejs/resources/images/checker.png');
-                    textureRoom.wrapS = THREE.RepeatWrapping;
-                    textureRoom.wrapT = THREE.RepeatWrapping;
-                    textureRoom.magFilter = THREE.NearestFilter;
-                    const repeats = roomSize / 2;
-                    textureRoom.repeat.set(repeats, repeats);
 
                     const roomGeo = new THREE.BoxGeometry();
-                    const roomMat = new THREE.MeshPhongMaterial({
-                    map: textureRoom,
-                    side: THREE.DoubleSide,
-                    });
 
-                    const roombox = new THREE.Mesh(roomGeo, roomMat);
+                    const loader = new THREE.TextureLoader();
+                
+                    const materials = [
+                        new THREE.MeshPhongMaterial({
+                            map: loader.load('texture/wall2.jpg'),
+                            side: THREE.BackSide
+                            }),
+                        new THREE.MeshPhongMaterial({
+                            map: loader.load('texture/wall2.jpg'),
+                            side: THREE.BackSide
+                            }),
+                        new THREE.MeshPhongMaterial({
+                            map: loader.load('texture/wall.jpg'),
+                            side: THREE.BackSide
+                            }),
+                        new THREE.MeshPhongMaterial({
+                            map: loader.load('texture/wall.jpg'),
+                            side: THREE.BackSide
+                            }),
+                        new THREE.MeshPhongMaterial({
+                            map: loader.load('texture/ground.jpg'),
+                            side: THREE.BackSide
+                            }),
+                        new THREE.MeshPhongMaterial({
+                            map: loader.load('texture/ground.jpg'),
+                            side: THREE.BackSide
+                            }),
+                    ];
+                    const roombox = new THREE.Mesh(roomGeo, materials);
                     roombox.scale.set(60,60,40);
                     roombox.position.set(0,12,0);
                     roombox.rotation.x = Math.PI * -.5;
@@ -172,10 +198,16 @@
 
                 // Teapot
                 {
-                    const objLoader = new OBJLoader2();
+                    const teapotMat = new THREE.MeshStandardMaterial ({
+                        side: THREE.DoubleSide,
+                        color: 0xff0000,
+                    });
+                    const objLoader = new OBJLoader();
                     var path = './mesh/newell_teaset/teapot.obj';
+                    // objLoader.setMaterials(teapotMat);
                     objLoader.load(path, (root) => {
                         root.rotation.y = Math.PI * 0.12;
+                        root.materials = teapotMat;
                         scene.add(root);
                     });
                 }
