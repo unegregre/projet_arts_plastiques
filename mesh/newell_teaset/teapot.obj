@@ -1,5 +1,3 @@
-mtllib teapot.mtl
-
 g Mesh1 Teapot Model
 
 usemtl FrontColor
