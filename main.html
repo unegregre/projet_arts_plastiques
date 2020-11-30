@@ -28,33 +28,14 @@
 
 			varying vec2 vUv;
 
-			void main(void) {
+			void main( void ) {
 
-				vec2 p = - 1.0 + 2.0 * vUv;
-				float a = time * 40.0;
-				float d, e, f, g = 1.0 / 40.0 ,h ,i ,r ,q;
+				vec2 position = - 1.0 + 2.0 * vUv;
 
-				e = 400.0 * ( p.x * 0.5 + 0.5 );
-				f = 400.0 * ( p.y * 0.5 + 0.5 );
-				i = 200.0 + sin( e * g + a / 150.0 ) * 20.0;
-				d = 200.0 + cos( f * g / 2.0 ) * 18.0 + cos( e * g ) * 7.0;
-				r = sqrt( pow( abs( i - e ), 2.0 ) + pow( abs( d - f ), 2.0 ) );
-				q = f / r;
-				e = ( r * cos( q ) ) - a / 2.0;
-				f = ( r * sin( q ) ) - a / 2.0;
-				d = sin( e * g ) * 176.0 + sin( e * g ) * 164.0 + r;
-				h = ( ( f + d ) + a / 2.0 ) * g;
-				i = cos( h + r * p.x / 1.3 ) * ( e + e + a ) + cos( q * g * 6.0 ) * ( r + h / 3.0 );
-				h = sin( f * g ) * 144.0 - sin( e * g ) * 212.0 * p.x;
-				h = ( h + ( f - e ) * q + sin( r - ( a + h ) / 7.0 ) * 10.0 + i / 4.0 ) * g;
-				i += cos( h * 2.3 * sin( a / 350.0 - q ) ) * 184.0 * sin( q - ( r * 4.3 + a / 12.0 ) * g ) + tan( r * g + h ) * 184.0 * cos( r * g + h );
-				i = mod( i / 5.6, 256.0 ) / 64.0;
-				if ( i < 0.0 ) i += 4.0;
-				if ( i >= 2.0 ) i = 4.0 - i;
-				d = r / 350.0;
-				d += sin( d * d * 8.0 ) * 0.52;
-				f = ( sin( a * g ) + 1.0 ) / 2.0;
-				gl_FragColor = vec4( vec3( f * i / 1.6, i / 2.0 + d / 13.0, i ) * d * p.x + vec3( i / 1.3 + d / 8.0, i / 2.0 + d / 18.0, i ) * d * ( 1.0 - p.x ), 1.0 );
+				float red = abs( sin( position.x * position.y + time / 5.0 ) );
+				float green = abs( sin( position.x * position.y + time / 4.0 ) );
+				float blue = abs( sin( position.x * position.y + time / 3.0 ) );
+				gl_FragColor = vec4( red, green, blue, 1.0 );
 
 			}
 
@@ -81,7 +62,7 @@
             import { MtlObjBridge } from "https://threejsfundamentals.org/threejs/resources/threejs/r119/examples/jsm/loaders/obj2/bridge/MtlObjBridge.js";
 
             import Stats from 'https://threejsfundamentals.org/threejs/resources/threejs/r119/examples/jsm/libs/stats.module.js';
-
+           
             const scope = this;
             var canvas;
             var renderer;
@@ -184,6 +165,7 @@
 					"time": { value: 1.0 }
 				};
 
+                
 
                 // Piédestal
                 {
@@ -269,14 +251,148 @@
                     scene.add(light.target);
                 }
 
-                // Teapot
+                // Teapot 1 : blanche
+
                 {
+                    const loader = new THREE.TextureLoader();
+
                     const shaderMat = new THREE.ShaderMaterial( {
 
+                        side: THREE.DoubleSide,
+                        transparent: true,
+                        opacity: 0.5,
                         uniforms: uniforms,
                         vertexShader: document.getElementById( 'vertexShader' ).textContent,
-                        fragmentShader: document.getElementById( 'fragmentShader' ).textContent
+                        fragmentShader: document.getElementById( 'fragmentShader' ).textContent,
                     } );
+
+                    const teapotMat = new THREE.MeshPhongMaterial ({
+                        side: THREE.DoubleSide,
+                    });
+
+                    var path = './mesh/newell_teaset/teapot2.obj';
+                    var modelName = 'teapot';
+
+                    const objLoader = new OBJLoader2();
+                    const callbackOnLoad = function ( object3d ) {
+
+                        scene.add( object3d );
+                        console.log( 'Loading complete: ' + modelName );
+
+                    };
+
+                    objLoader.setModelName( modelName );
+                    objLoader.addMaterials( teapotMat);
+                    objLoader.load( path, 
+                        function( obj ){
+                            obj.rotation.y = Math.PI * 0.43;
+                            
+                            obj.scale.x = 0.5;
+                            obj.scale.y = 0.5;
+                            obj.scale.z = 0.5;
+
+                            obj.position.x = -1.8;
+                            obj.position.z = -2.7;
+
+                            obj.traverse( function( child ) {
+                                if ( child instanceof THREE.Mesh ) {
+                                    child.material = teapotMat;
+                                }
+                            } );
+                            scene.add( obj );
+                        },
+                        function( xhr ){
+                            console.log( (xhr.loaded / xhr.total * 100) + "% loaded")
+                        },
+                        function( err ){
+                            console.error( "Error loading 'ship.obj'")
+                        }
+                    );
+                } 
+
+                // Teapot 2 : métal
+                {
+                    const loader = new THREE.TextureLoader();
+
+                    const shaderMat = new THREE.ShaderMaterial( {
+
+                        side: THREE.DoubleSide,
+                        transparent: true,
+                        opacity: 0.5,
+                        uniforms: uniforms,
+                        vertexShader: document.getElementById( 'vertexShader' ).textContent,
+                        fragmentShader: document.getElementById( 'fragmentShader' ).textContent,
+                    } );
+
+                    const teapotMat = new THREE.MeshPhongMaterial ({
+                        side: THREE.DoubleSide,
+                        color: 0x333333,
+
+                        emissive: 0x000033,
+                        shininess: 90,
+                        specular: 0xff00ff,
+                        reflectivity: 0.5,
+                        transparent: true,
+                        metalness: 0.8,
+                        roughness: 0.5,
+                        // wireframe: true,
+                    });
+
+                    var path = './mesh/newell_teaset/teapot2.obj';
+                    var modelName = 'teapot_metal';
+
+                    const objLoader = new OBJLoader2();
+                    const callbackOnLoad = function ( object3d ) {
+
+                        scene.add( object3d );
+                        console.log( 'Loading complete: ' + modelName );
+
+                    };
+
+                    objLoader.setModelName( modelName );
+                    objLoader.addMaterials( teapotMat);
+                    objLoader.load( path, 
+                        function( obj ){
+                            obj.rotation.y = Math.PI * 0.35;
+                            
+                            obj.scale.x = 0.5;
+                            obj.scale.y = 0.5;
+                            obj.scale.z = 0.5;
+
+                            obj.position.x = 1;
+                            obj.position.z = -2.5;
+
+                            obj.traverse( function( child ) {
+                                if ( child instanceof THREE.Mesh ) {
+                                    child.material = teapotMat;
+                                }
+                            } );
+                            scene.add( obj );
+                        },
+                        function( xhr ){
+                            console.log( (xhr.loaded / xhr.total * 100) + "% loaded")
+                        },
+                        function( err ){
+                            console.error( "Error loading 'ship.obj'")
+                        }
+                    );
+                } 
+
+                // Teapot 3 : blue and transparent
+                {
+
+                    const loader = new THREE.TextureLoader();
+
+                    const shaderMat = new THREE.ShaderMaterial( {
+
+                        side: THREE.DoubleSide,
+                        transparent: true,
+                        opacity: 0.5,
+                        uniforms: uniforms,
+                        vertexShader: document.getElementById( 'vertexShader' ).textContent,
+                        fragmentShader: document.getElementById( 'fragmentShader' ).textContent,
+                    } );
+
                     const teapotMat = new THREE.MeshPhongMaterial ({
                         side: THREE.DoubleSide,
                         color: 0x8888cc,
@@ -287,13 +403,125 @@
                         reflectivity: 0.5,
                         opacity: 0.8,
                         transparent: true
-                        // metalness: 0.8,
-                        // roughness: 0.5,
-                        // wireframe: true,
                     });
-        
-                    var path = './mesh/newell_teaset/teapot.obj';
-                    var modelName = 'teapot';
+
+                    var path = './mesh/newell_teaset/teapot2.obj';
+                    var modelName = 'teapot_transparent';
+
+                    const objLoader = new OBJLoader2();
+                    const callbackOnLoad = function ( object3d ) {
+
+                        scene.add( object3d );
+                        console.log( 'Loading complete: ' + modelName );
+
+                    };
+
+                    objLoader.setModelName( modelName );
+                    objLoader.addMaterials( teapotMat);
+                    objLoader.load( path, 
+                        function( obj ){
+                            obj.rotation.y = Math.PI * -0.12;
+                            
+                            obj.scale.x = 0.5;
+                            obj.scale.y = 0.5;
+                            obj.scale.z = 0.5;
+
+                            obj.position.x = 2.2;
+                            obj.position.z = -0.7;
+
+                            obj.traverse( function( child ) {
+                                if ( child instanceof THREE.Mesh ) {
+                                    child.material = teapotMat;
+                                }
+                            } );
+                            scene.add( obj );
+                        },
+                        function( xhr ){
+                            console.log( (xhr.loaded / xhr.total * 100) + "% loaded")
+                        },
+                        function( err ){
+                            console.error( "Error loading 'ship.obj'")
+                        }
+                    );
+                }
+
+                // Teapot 4 : wireframe
+                {
+
+                    const loader = new THREE.TextureLoader();
+
+                    const shaderMat = new THREE.ShaderMaterial( {
+
+                        side: THREE.DoubleSide,
+                        transparent: true,
+                        opacity: 0.5,
+                        uniforms: uniforms,
+                        vertexShader: document.getElementById( 'vertexShader' ).textContent,
+                        fragmentShader: document.getElementById( 'fragmentShader' ).textContent,
+                    } );
+
+                    const teapotMat = new THREE.MeshPhongMaterial ({
+                        side: THREE.DoubleSide,
+                        color: 0x555555,
+
+                        wireframe: true
+                    });
+
+                    var path = './mesh/newell_teaset/teapot2.obj';
+                    var modelName = 'teapot_wireframe';
+
+                    const objLoader = new OBJLoader2();
+                    const callbackOnLoad = function ( object3d ) {
+
+                        scene.add( object3d );
+                        console.log( 'Loading complete: ' + modelName );
+
+                    };
+
+                    objLoader.setModelName( modelName );
+                    objLoader.addMaterials( teapotMat);
+                    objLoader.load( path, 
+                        function( obj ){
+                            obj.rotation.y = Math.PI * 0.25;
+                            
+                            obj.scale.x = 0.5;
+                            obj.scale.y = 0.5;
+                            obj.scale.z = 0.5;
+
+                            obj.position.x = 2.4;
+                            obj.position.z = 1.8;
+
+                            obj.traverse( function( child ) {
+                                if ( child instanceof THREE.Mesh ) {
+                                    child.material = teapotMat;
+                                }
+                            } );
+                            scene.add( obj );
+                        },
+                        function( xhr ){
+                            console.log( (xhr.loaded / xhr.total * 100) + "% loaded")
+                        },
+                        function( err ){
+                            console.error( "Error loading 'ship.obj'")
+                        }
+                    );
+                }
+
+                // Teapot 5 : disco
+                {
+
+                    const loader = new THREE.TextureLoader();
+
+                    const shaderMat = new THREE.ShaderMaterial( {
+
+                        side: THREE.DoubleSide,
+                        uniforms: uniforms,
+                        vertexShader: document.getElementById( 'vertexShader' ).textContent,
+                        fragmentShader: document.getElementById( 'fragmentShader' ).textContent,
+                    } );
+
+                    var path = './mesh/newell_teaset/teapot_old.obj';
+                    var modelName = 'teapot_disco';
 
                     const objLoader = new OBJLoader2();
                     const callbackOnLoad = function ( object3d ) {
@@ -307,10 +535,138 @@
                     objLoader.addMaterials( shaderMat);
                     objLoader.load( path, 
                         function( obj ){
-                            obj.rotation.y = Math.PI * 0.12;
+                            obj.rotation.y = Math.PI * -0.7;
+                            
+                            obj.scale.x = 0.5;
+                            obj.scale.y = 0.5;
+                            obj.scale.z = 0.5;
+
+                            obj.position.x = 0.7;
+                            obj.position.z = 2;
+
                             obj.traverse( function( child ) {
                                 if ( child instanceof THREE.Mesh ) {
                                     child.material = shaderMat;
+                                }
+                            } );
+                            scene.add( obj );
+                        },
+                        function( xhr ){
+                            console.log( (xhr.loaded / xhr.total * 100) + "% loaded")
+                        },
+                        function( err ){
+                            console.error( "Error loading 'ship.obj'")
+                        }
+                    );
+                }
+
+                // Teapot 6 : le monstre
+                {
+
+                    const loader = new THREE.TextureLoader();
+
+                    const bubbleMat = new THREE.MeshStandardMaterial ({
+                        side: THREE.DoubleSide,
+
+                        envMap:loader.load('texture/papier-bulle/paper_0011_base_color_4k.jpg'),
+                        map: loader.load('texture/papier-bulle/paper_0011_base_color_4k.jpg'),
+                        aoMap: loader.load('texture/papier-bulle/paper_0011_ao_4k.jpg'),
+                        displacementMap: loader.load('texture/papier-bulle/paper_0011_displacement_4k.jpg'),
+                        displacementScale: 1,
+                        //alphaMap: loader.load('texture/papier-bulle/paper_0011_opacity_4k.jpg'),
+                        //transparent: true,
+                        metalnessMap: loader.load('texture/papier-bulle/paper_0011_metallic_4k.jpg'),
+                        normalMap: loader.load('texture/papier-bulle/paper_0011_normal_4k.jpg'),
+                        roughnessMap: loader.load('texture/papier-bulle/paper_0011_roughness_4k.jpg'),
+                    });
+
+                    var path = './mesh/newell_teaset/teapot2.obj';
+                    var modelName = 'teapot_monstre';
+
+                    const objLoader = new OBJLoader2();
+                    const callbackOnLoad = function ( object3d ) {
+
+                        scene.add( object3d );
+                        console.log( 'Loading complete: ' + modelName );
+
+                    };
+
+                    objLoader.setModelName( modelName );
+                    objLoader.addMaterials( bubbleMat);
+                    objLoader.load( path, 
+                        function( obj ){
+                            obj.rotation.y = Math.PI * -0.5;
+                            
+                            obj.scale.x = 0.5;
+                            obj.scale.y = 0.5;
+                            obj.scale.z = 0.5;
+
+                            obj.position.x = -0.9-1;
+                            obj.position.z = 3;
+
+                            obj.traverse( function( child ) {
+                                if ( child instanceof THREE.Mesh ) {
+                                    child.material = bubbleMat;
+                                }
+                            } );
+                            scene.add( obj );
+                        },
+                        function( xhr ){
+                            console.log( (xhr.loaded / xhr.total * 100) + "% loaded")
+                        },
+                        function( err ){
+                            console.error( "Error loading 'ship.obj'")
+                        }
+                    );
+                }
+
+                // Teapot 7 : papier bulle
+                {
+
+                    const loader = new THREE.TextureLoader();
+
+                    const bubbleMat = new THREE.MeshStandardMaterial ({
+                        side: THREE.DoubleSide,
+
+                        envMap:loader.load('texture/papier-bulle/paper_0011_base_color_4k.jpg'),
+                        map: loader.load('texture/papier-bulle/paper_0011_base_color_4k.jpg'),
+                        aoMap: loader.load('texture/papier-bulle/paper_0011_ao_4k.jpg'),
+                        displacementMap: loader.load('texture/papier-bulle/paper_0011_displacement_4k.jpg'),
+                        displacementScale: 0.05,
+                        alphaMap: loader.load('texture/papier-bulle/paper_0011_opacity_4k.jpg'),
+                        transparent: true,
+                        metalnessMap: loader.load('texture/papier-bulle/paper_0011_metallic_4k.jpg'),
+                        normalMap: loader.load('texture/papier-bulle/paper_0011_normal_4k.jpg'),
+                        roughnessMap: loader.load('texture/papier-bulle/paper_0011_roughness_4k.jpg'),
+                    });
+
+                    var path = './mesh/newell_teaset/teapot2.obj';
+                    var modelName = 'teapot_papierbulle';
+
+                    const objLoader = new OBJLoader2();
+                    const callbackOnLoad = function ( object3d ) {
+
+                        scene.add( object3d );
+                        console.log( 'Loading complete: ' + modelName );
+
+                    };
+
+                    objLoader.setModelName( modelName );
+                    objLoader.addMaterials( bubbleMat);
+                    objLoader.load( path, 
+                        function( obj ){
+                            obj.rotation.y = Math.PI * 0.85;
+
+                            obj.scale.x = 0.5;
+                            obj.scale.y = 0.5;
+                            obj.scale.z = 0.5;
+
+                            obj.position.x = -2.5;
+                            obj.position.z = 0.8;
+
+                            obj.traverse( function( child ) {
+                                if ( child instanceof THREE.Mesh ) {
+                                    child.material = bubbleMat;
                                 }
                             } );
                             scene.add( obj );
